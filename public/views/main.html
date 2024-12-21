@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini-Games App</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="icon" type="image/png" href="../images/logo.png">
+</head>
+<body>
+    <header>
+        <h1>Mini-Games App</h1>
+    </header>
+    <main>
+        <div class="game-grid">
+            <div class="game-card" id="snake">
+                <img src="https://fal.media/files/koala/ekfdgjYTphgsUQyrhvPs5_52f3462e7268448d9a52ebb54ffe3e04.jpg" alt="Snake Game">
+                <h2><i class="fas fa-snake"></i> Snake</h2>
+                <button class="play-btn">Play</button>
+            </div>
+            <div class="game-card" id="checkers">
+                <img src="https://images.saymedia-content.com/.image/t_share/MTc0NDczOTc0MzU2MjU2MTA0/checkers-strategy-tactics-how-to-win.jpg" alt="Checkers Game">
+                <h2><i class="fas fa-chess-board"></i> Checkers</h2>
+                <button class="play-btn">Play</button>
+            </div>
+            <div class="game-card" id="cards">
+                <img src="https://fal.media/files/tiger/VtvSNez1nEWOtJIBf5EdH_f03049a9036e46e4af4f2a97e522d473.jpg" alt="Memory Card Game">
+                <h2><i class="fas fa-brain"></i> Memory Game</h2>
+                <button class="play-btn">Play</button>
+            </div>
+            <div class="game-card" id="billiards">
+                <img src="https://fal.media/files/tiger/_qfacsOWoTbvpT55h35wu_4e10c0c59d784875aadacb6abe7ba630.jpg" alt="Billiards Game">
+                <h2><i class="fas fa-circle"></i> Billiards</h2>
+                <button class="play-btn">Play</button>
+            </div>
+            <div class="game-card" id="flappybird">
+                <img src="https://imgcdn.stablediffusionweb.com/2024/4/10/a2a146a7-a39b-44e3-8792-3ffa640366af.jpg" alt="Flappy Bird Game">
+                <h2><i class="fas fa-bird"></i> Flappy Bird</h2>
+                <button class="play-btn">Play</button>
+            </div>
+            <div class="game-card" id="hamsterclicker">
+                <img src="https://imgcdn.stablediffusionweb.com/2024/9/9/05f11a24-f011-4478-b53f-1dc0c9026293.jpg" alt="Hamster Clicker Game">
+                <h2><i class="fas fa-mouse"></i> Hamster Clicker</h2>
+                <button class="play-btn">Play</button>
+            </div>
+            <div class="game-card" id="tictactoe">
+                <img src="https://e7.pngegg.com/pngimages/432/235/png-clipart-tic-tac-toe-board-game-prompt-miscellaneous-game.png" alt="Tic Tac Toe Game">
+                <h2><i class="fas fa-th"></i> Tic Tac Toe</h2>
+                <button class="play-btn">Play</button>
+            </div>
+            <div class="game-card" id="coloringpage">
+                <img src="https://logodix.com/logo/748308.png" alt="Coloring Page">
+                <h2><i class="fas fa-paint-brush"></i> Coloring Page</h2>
+                <button class="play-btn">Play</button>
+            </div>
+        </div>
+    </main>
+    <div id="game-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title"></h2>
+            <div id="game-container"></div>
+        </div>
+    </div>
+    <script src="../js/script.js" type="module"></script>
+</body>
+</html>
