@@ -81,10 +81,6 @@ Ensure you have the following installed:
    ```
 2. Open your browser and go to `http://localhost:10000` to start playing.
 
-## Screenshots
-
-![Logo](public/images/logo.png)
-
 ## Contributing
 
 Contributions are welcome! 🤝 Feel free to submit a pull request or open an issue to discuss new features or bug fixes.
