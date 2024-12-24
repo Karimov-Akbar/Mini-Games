@@ -1,207 +1,223 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
 :root {
-    --primary-color: #6a5acd;
-    --secondary-color: #9370db;
-    --background-color: #f0f8ff;
-    --text-color: #333333;
-    --card-bg-color: #ffffff;
+  --primary-color: #6a5acd;
+  --secondary-color: #9370db;
+  --background-color: #f0f8ff;
+  --text-color: #333333;
+  --card-bg-color: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    margin: 0;
-    padding: 0;
-    transition: background-color 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  transition: background-color 0.3s ease;
 }
 
 header {
-    background-color: var(--primary-color);
-    color: white;
-    text-align: center;
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: var(--primary-color);
+  color: white;
+  text-align: center;
+  padding: clamp(1rem, 5vw, 2rem);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
-    margin: 0;
-    font-size: 2.5rem;
-    font-weight: 600;
-    letter-spacing: 2px;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: 2px;
 }
 
 .game-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1rem, 3vw, 2rem);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .game-card {
-    background-color: var(--card-bg-color);
-    border-radius: 15px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    padding: 1.5rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    overflow: hidden;
+  background-color: var(--card-bg-color);
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
 }
 
 .game-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
 }
 
 .game-card img {
-    width: 100%;
-    border-radius: 10px;
-    transition: transform 0.3s ease;
+  width: 100%;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
 }
 
 .game-card:hover img {
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 .game-card h2 {
-    margin: 1rem 0;
-    font-size: 1.5rem;
-    font-weight: 600;
+  margin: 1rem 0;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  font-weight: 600;
 }
 
 .play-btn {
-    background-color: var(--secondary-color);
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: 1px;
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: clamp(0.4rem, 2vw, 0.75rem) clamp(0.8rem, 4vw, 1.5rem);
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  font-weight: 600;
+  letter-spacing: 1px;
 }
 
 .play-btn:hover {
-    background-color: var(--primary-color);
-    transform: scale(1.05);
+  background-color: var(--primary-color);
+  transform: scale(1.05);
 }
 
 .modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    animation: fadeIn 0.3s ease;
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
-    background-color: var(--card-bg-color);
-    margin: 5% auto;
-    padding: 2rem;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 800px;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-    animation: slideIn 0.3s ease;
+  background-color: var(--card-bg-color);
+  margin: 5% auto;
+  padding: 1.5rem;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease;
 }
 
 @keyframes slideIn {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.3s ease;
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
 
 .close:hover,
 .close:focus {
-    color: var(--text-color);
-    text-decoration: none;
+  color: var(--text-color);
+  text-decoration: none;
 }
 
 #game-container {
-    min-height: 300px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
 }
 
 #game-container canvas {
-    display: block;
-    margin: 0 auto;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 }
 
 .memory-game {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    perspective: 1000px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  perspective: 1000px;
 }
 
 .card {
-    width: 80px;
-    height: 120px;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.5s;
-    cursor: pointer;
+  width: 80px;
+  height: 120px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+  cursor: pointer;
 }
 
 .card.flipped {
-    transform: rotateY(180deg);
+  transform: rotateY(180deg);
 }
 
 .card-face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    font-size: 24px;
-    font-weight: bold;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 24px;
+  font-weight: bold;
 }
 
 .card-front {
-    background-color: var(--primary-color);
-    color: white;
+  background-color: var(--primary-color);
+  color: white;
 }
 
 .card-back {
-    background-color: white;
-    transform: rotateY(180deg);
+  background-color: white;
+  transform: rotateY(180deg);
 }
 
 .card-back img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
 }
 
 .hamster-clicker {
@@ -238,12 +254,7 @@ h1 {
   font-weight: bold;
 }
 
-#game-container canvas {
-  border: 1px solid #ccc;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-coloring-ui {
+.coloring-ui {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -251,10 +262,21 @@ coloring-ui {
 }
 
 .canvas-container {
-  width: 600px;
-  height: 400px;
+  width: 100%;
+  max-width: 600px;
+  height: 0;
+  padding-bottom: 75%; /* 4:3 aspect ratio */
+  position: relative;
   border: 1px solid #ccc;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.canvas-container canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .controls-container {
@@ -274,7 +296,7 @@ coloring-ui {
   margin-top: 20px;
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #9370db;
+  background-color: var(--secondary-color);
   color: white;
   border: none;
   border-radius: 5px;
@@ -283,7 +305,7 @@ coloring-ui {
 }
 
 .mode-selection button:hover {
-  background-color: #6a5acd;
+  background-color: var(--primary-color);
 }
 
 .drawing-tools {
@@ -303,7 +325,7 @@ coloring-ui {
 
 .drawing-tools button {
   padding: 5px 10px;
-  background-color: #9370db;
+  background-color: var(--secondary-color);
   color: white;
   border: none;
   border-radius: 3px;
@@ -312,21 +334,83 @@ coloring-ui {
 }
 
 .drawing-tools button:hover {
-  background-color: #6a5acd;
+  background-color: var(--primary-color);
 }
 
-#drawing-canvas {
-  width: 100%;
-  height: 100%;
+.touch-controls {
+  display: none;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
-@media (max-width: 600px) {
-    .memory-game {
-        grid-template-columns: repeat(3, 1fr);
-    }
+.touch-controls button {
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  touch-action: manipulation;
+}
 
-    .card {
-        width: 60px;
-        height: 90px;
-    }
+@media (max-width: 768px) {
+  .game-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .game-card {
+    padding: 1rem;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 1rem;
+  }
+
+  .touch-controls {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  header {
+    padding: 1rem;
+  }
+
+  .game-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    margin: 10% auto;
+  }
+
+  .memory-game {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 5px;
+  }
+
+  .card {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 3;
+  }
+
+  .hamster-container {
+    width: 80%;
+    max-width: 200px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .stats {
+    font-size: 18px;
+  }
+
+  .mode-selection button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
 }
