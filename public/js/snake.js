@@ -2,7 +2,10 @@ class SnakeGame {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
     this.setupGameContainer();
-    this.controlType = null; // Will be either 'arrows' or 'buttons'
+    this.controlType = null;
+    this.touchStartX = null;
+    this.touchStartY = null;
+    this.minSwipeDistance = 30; // minimum distance for a swipe to register
     this.showControlSelection();
   }
 
@@ -10,10 +13,14 @@ class SnakeGame {
     this.container.style.display = 'flex';
     this.container.style.flexDirection = 'column';
     this.container.style.alignItems = 'center';
-    this.container.style.gap = '1rem';
     this.container.style.padding = '1rem';
-    this.container.style.maxWidth = '100%';
+    this.container.style.width = '100%';
+    this.container.style.maxWidth = '600px';
     this.container.style.margin = '0 auto';
+    this.container.style.backgroundColor = '#f8f9fa';
+    this.container.style.borderRadius = '12px';
+    this.container.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+    this.container.style.boxSizing = 'border-box';
   }
 
   showControlSelection() {
@@ -91,14 +98,14 @@ class SnakeGame {
       '⌨️'
     );
 
-    const touchButton = createChoiceButton(
-      'Touch Buttons',
-      'buttons',
+    const swipeButton = createChoiceButton(
+      'Swipe Controls',
+      'swipe',
       '👆'
     );
 
     buttonContainer.appendChild(arrowsButton);
-    buttonContainer.appendChild(touchButton);
+    buttonContainer.appendChild(swipeButton);
 
     selectionContainer.appendChild(title);
     selectionContainer.appendChild(buttonContainer);
@@ -125,8 +132,15 @@ class SnakeGame {
 
     if (this.controlType === 'arrows') {
       this.setupKeyboardControls();
-    } else if (this.controlType === 'buttons') {
-      this.setupTouchControls();
+    } else if (this.controlType === 'swipe') {
+      this.setupSwipeControls();
+      // Add swipe instructions
+      const instructions = document.createElement('div');
+      instructions.style.textAlign = 'center';
+      instructions.style.marginTop = '1rem';
+      instructions.style.color = '#666';
+      instructions.textContent = 'Swipe to control the snake';
+      this.container.appendChild(instructions);
     }
 
     this.resizeCanvas();
@@ -134,15 +148,52 @@ class SnakeGame {
     this.start();
   }
 
-  setupKeyboardControls() {
-    // Add keyboard instructions
-    const instructions = document.createElement('div');
-    instructions.style.textAlign = 'center';
-    instructions.style.marginTop = '1rem';
-    instructions.style.color = '#666';
-    instructions.textContent = 'Use arrow keys to control the snake';
-    this.container.appendChild(instructions);
+  setupSwipeControls() {
+    this.canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      this.touchStartX = touch.clientX;
+      this.touchStartY = touch.clientY;
+    }, { passive: false });
 
+    this.canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    this.canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      if (!this.touchStartX || !this.touchStartY) return;
+
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - this.touchStartX;
+      const deltaY = touch.clientY - this.touchStartY;
+
+      // Check if the swipe distance is long enough
+      if (Math.abs(deltaX) < this.minSwipeDistance && Math.abs(deltaY) < this.minSwipeDistance) return;
+
+      // Determine swipe direction based on the larger delta
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe
+        if (deltaX > 0 && this.direction !== 'left') {
+          this.direction = 'right';
+        } else if (deltaX < 0 && this.direction !== 'right') {
+          this.direction = 'left';
+        }
+      } else {
+        // Vertical swipe
+        if (deltaY > 0 && this.direction !== 'up') {
+          this.direction = 'down';
+        } else if (deltaY < 0 && this.direction !== 'down') {
+          this.direction = 'up';
+        }
+      }
+
+      this.touchStartX = null;
+      this.touchStartY = null;
+    }, { passive: false });
+  }
+
+  setupKeyboardControls() {
     document.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowUp':
@@ -168,6 +219,7 @@ class SnakeGame {
     this.canvas.style.backgroundColor = '#ffffff';
     this.canvas.style.borderRadius = '8px';
     this.canvas.style.boxShadow = '0 0 10px rgba(0,0,0,0.1)';
+    this.canvas.style.touchAction = 'none'; // Prevent default touch actions
     this.container.appendChild(this.canvas);
     this.canvas.width = this.width * this.size;
     this.canvas.height = this.height * this.size;
@@ -183,85 +235,6 @@ class SnakeGame {
     this.scoreElement.style.width = '100%';
     this.container.appendChild(this.scoreElement);
     this.updateScore();
-  }
-
-  setupTouchControls() {
-    const touchControls = document.createElement('div');
-    touchControls.className = 'touch-controls';
-    touchControls.style.display = 'grid';
-    touchControls.style.gridTemplateColumns = 'repeat(3, 1fr)';
-    touchControls.style.gap = '0.5rem';
-    touchControls.style.width = '180px';
-    touchControls.style.margin = '1rem auto';
-
-    const buttonStyles = {
-      up: { gridColumn: '2', gridRow: '1' },
-      left: { gridColumn: '1', gridRow: '2' },
-      right: { gridColumn: '3', gridRow: '2' },
-      down: { gridColumn: '2', gridRow: '3' }
-    };
-
-    ['Up', 'Down', 'Left', 'Right'].forEach(direction => {
-      const button = document.createElement('button');
-      button.textContent = direction;
-      button.style.padding = '0.5rem';
-      button.style.backgroundColor = '#4CAF50';
-      button.style.color = 'white';
-      button.style.border = 'none';
-      button.style.borderRadius = '8px';
-      button.style.cursor = 'pointer';
-      button.style.fontSize = '1rem';
-      button.style.fontWeight = 'bold';
-      button.style.touchAction = 'manipulation';
-      button.style.userSelect = 'none';
-
-      const lowerDirection = direction.toLowerCase();
-      if (buttonStyles[lowerDirection]) {
-        Object.assign(button.style, buttonStyles[lowerDirection]);
-      }
-
-      button.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        this.handleTouchControl(direction.toLowerCase());
-        button.style.backgroundColor = '#45a049';
-      });
-
-      button.addEventListener('touchend', () => {
-        button.style.backgroundColor = '#4CAF50';
-      });
-
-      // Add mouse support for desktop testing
-      button.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        this.handleTouchControl(direction.toLowerCase());
-        button.style.backgroundColor = '#45a049';
-      });
-
-      button.addEventListener('mouseup', () => {
-        button.style.backgroundColor = '#4CAF50';
-      });
-
-      touchControls.appendChild(button);
-    });
-
-    this.container.appendChild(touchControls);
-  }
-
-  handleTouchControl(direction) {
-    switch (direction) {
-      case 'up':
-        if (this.direction !== 'down') this.direction = 'up';
-        break;
-      case 'down':
-        if (this.direction !== 'up') this.direction = 'down';
-        break;
-      case 'left':
-        if (this.direction !== 'right') this.direction = 'left';
-        break;
-      case 'right':
-        if (this.direction !== 'left') this.direction = 'right';
-        break;
-    }
   }
 
   generateFood() {

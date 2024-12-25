@@ -17,8 +17,7 @@ class FlappyBirdGame {
       height: 30,
       velocity: 0,
       gravity: 0.6,
-      jump: -10,
-      speed: 5
+      jump: -10
     };
 
     this.pipes = [];
@@ -29,27 +28,77 @@ class FlappyBirdGame {
 
     this.score = 0;
     this.gameOver = false;
+    this.gameStarted = false;
+
+    this.initialSpeed = 2;
+    this.currentSpeed = this.initialSpeed;
+    this.maxSpeed = 5;
+    this.speedIncreaseInterval = 500; // Increase speed every 500 points
 
     this.setupEventListeners();
+    this.showStartPrompt();
   }
 
   setupEventListeners() {
-    this.canvas.addEventListener('click', () => this.jump());
+    this.canvas.addEventListener('click', () => this.handleClick());
     document.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') this.jump();
+      if (e.code === 'Space') this.handleClick();
     });
   }
 
-  jump() {
-    if (this.gameOver) {
+  handleClick() {
+    if (!this.gameStarted) {
+      this.startGame();
+    } else if (this.gameOver) {
       this.resetGame();
     } else {
       this.bird.velocity = this.bird.jump;
     }
   }
 
+  showStartPrompt() {
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    this.ctx.fillRect(0, 0, this.width, this.height);
+
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = 'bold 24px Arial';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText('Flappy Bird', this.width / 2, this.height / 2 - 50);
+
+    this.ctx.font = '18px Arial';
+    this.ctx.fillText('Click or press Space to start', this.width / 2, this.height / 2);
+
+    this.ctx.font = '16px Arial';
+    this.ctx.fillText('Click or press Space to flap', this.width / 2, this.height / 2 + 30);
+  }
+
+  startGame() {
+    this.gameStarted = true;
+    this.resetGame();
+    this.gameLoop();
+  }
+
+  resetGame() {
+    this.bird.y = this.height / 2;
+    this.bird.velocity = 0;
+    this.pipes = [];
+    this.score = 0;
+    this.gameOver = false;
+    this.currentSpeed = this.initialSpeed;
+    this.frameCount = 0;
+  }
+
+  spawnPipe() {
+    const gapStart = Math.random() * (this.height - this.pipeGap);
+    this.pipes.push({
+      x: this.width,
+      gapStart: gapStart,
+      gapEnd: gapStart + this.pipeGap
+    });
+  }
+
   update() {
-    if (this.gameOver) return;
+    if (!this.gameStarted || this.gameOver) return;
 
     this.bird.velocity += this.bird.gravity;
     this.bird.y += this.bird.velocity;
@@ -68,11 +117,16 @@ class FlappyBirdGame {
     }
 
     this.pipes.forEach((pipe, index) => {
-      pipe.x -= this.bird.speed;
+      pipe.x -= this.currentSpeed;
 
       if (pipe.x + this.pipeWidth < 0) {
         this.pipes.splice(index, 1);
         this.score++;
+        
+        // Increase speed every speedIncreaseInterval points
+        if (this.score % this.speedIncreaseInterval === 0) {
+          this.currentSpeed = Math.min(this.currentSpeed + 0.5, this.maxSpeed);
+        }
       }
 
       if (this.checkCollision(pipe)) {
@@ -81,15 +135,6 @@ class FlappyBirdGame {
     });
 
     this.frameCount++;
-  }
-
-  spawnPipe() {
-    const gapStart = Math.random() * (this.height - this.pipeGap);
-    this.pipes.push({
-      x: this.width,
-      gapStart: gapStart,
-      gapEnd: gapStart + this.pipeGap
-    });
   }
 
   checkCollision(pipe) {
@@ -101,42 +146,39 @@ class FlappyBirdGame {
   }
 
   draw() {
+    // Clear the canvas
     this.ctx.fillStyle = '#87CEEB';
     this.ctx.fillRect(0, 0, this.width, this.height);
 
+    // Draw bird
     this.ctx.fillStyle = '#FFD700';
     this.ctx.fillRect(this.bird.x, this.bird.y, this.bird.width, this.bird.height);
 
+    // Draw pipes
     this.ctx.fillStyle = '#00FF00';
     this.pipes.forEach(pipe => {
       this.ctx.fillRect(pipe.x, 0, this.pipeWidth, pipe.gapStart);
       this.ctx.fillRect(pipe.x, pipe.gapEnd, this.pipeWidth, this.height - pipe.gapEnd);
     });
 
+    // Draw score
     this.ctx.fillStyle = '#000000';
     this.ctx.font = '24px Arial';
+    this.ctx.textAlign = 'left';
     this.ctx.fillText(`Score: ${this.score}`, 10, 30);
 
     if (this.gameOver) {
-      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
       this.ctx.fillRect(0, 0, this.width, this.height);
+
       this.ctx.fillStyle = '#FFFFFF';
-      this.ctx.font = '48px Arial';
+      this.ctx.font = 'bold 48px Arial';
       this.ctx.textAlign = 'center';
       this.ctx.fillText('Game Over', this.width / 2, this.height / 2 - 50);
       this.ctx.font = '24px Arial';
       this.ctx.fillText(`Final Score: ${this.score}`, this.width / 2, this.height / 2 + 50);
-      this.ctx.fillText('Click to Restart', this.width / 2, this.height / 2 + 100);
+      this.ctx.fillText('Click or press Space to restart', this.width / 2, this.height / 2 + 100);
     }
-  }
-
-  resetGame() {
-    this.bird.y = this.height / 2;
-    this.bird.velocity = 0;
-    this.pipes = [];
-    this.score = 0;
-    this.gameOver = false;
-    this.frameCount = 0;
   }
 
   gameLoop() {
@@ -146,8 +188,7 @@ class FlappyBirdGame {
   }
 
   start() {
-    this.resetGame();
-    this.gameLoop();
+    this.showStartPrompt();
   }
 }
 
