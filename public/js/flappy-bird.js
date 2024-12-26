@@ -16,24 +16,24 @@ class FlappyBirdGame {
       width: 40,
       height: 30,
       velocity: 0,
-      gravity: 0.6,
-      jump: -10
+      gravity: 0.5,
+      jump: -8
     };
 
     this.pipes = [];
     this.pipeWidth = 50;
     this.pipeGap = 150;
-    this.pipeSpawnInterval = 90;
+    this.pipeSpawnInterval = 120;
     this.frameCount = 0;
 
     this.score = 0;
     this.gameOver = false;
     this.gameStarted = false;
 
-    this.initialSpeed = 2;
+    this.initialSpeed = 1.5;
     this.currentSpeed = this.initialSpeed;
-    this.maxSpeed = 5;
-    this.speedIncreaseInterval = 500; // Increase speed every 500 points
+    this.maxSpeed = 4;
+    this.speedIncreaseInterval = 1000; // Increase speed every 1000 points
 
     this.setupEventListeners();
     this.showStartPrompt();
@@ -125,7 +125,7 @@ class FlappyBirdGame {
         
         // Increase speed every speedIncreaseInterval points
         if (this.score % this.speedIncreaseInterval === 0) {
-          this.currentSpeed = Math.min(this.currentSpeed + 0.5, this.maxSpeed);
+          this.currentSpeed = Math.min(this.currentSpeed + 0.25, this.maxSpeed);
         }
       }
 
