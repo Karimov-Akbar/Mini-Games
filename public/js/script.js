@@ -1,7 +1,7 @@
 import SnakeGame from './snake.js';
 import CheckersGame from './checkers.js';
 import MemoryGame from './memory.js';
-import BilliardsGame from './billiards.js';
+import TetrisGame from './tetris.js';
 import FlappyBirdGame from './flappy-bird.js';
 import HamsterClickerGame from './hamster-clicker.js';
 import TicTacToeGame from './tic-tac-toe.js';
@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
         currentGame = new MemoryGame('game-container');
         currentGame.start();
         break;
-      case 'billiards':
-        currentGame = new BilliardsGame('game-container');
+      case 'tetris':
+        currentGame = new TetrisGame('game-container');
         currentGame.start();
         break;
       case 'flappybird':
@@ -74,8 +74,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeModal() {
     modal.style.display = 'none';
-    if (currentGame && currentGame.gameLoop) {
-      cancelAnimationFrame(currentGame.gameLoop);
+    if (currentGame) {
+      if (currentGame.destroy) {
+        currentGame.destroy();
+      }
+      if (currentGame.gameLoop) {
+        cancelAnimationFrame(currentGame.gameLoop);
+      }
     }
     currentGame = null;
     gameContainer.innerHTML = '';
