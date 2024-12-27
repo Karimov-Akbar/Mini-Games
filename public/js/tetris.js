@@ -17,16 +17,17 @@ class TetrisGame {
     this.score = 0;
     this.gameOver = false;
     this.paused = false;
+    this.controlType = null;
 
     // Tetromino shapes and colors
     this.shapes = {
-      I: [[1, 1, 1, 1]],
-      O: [[1, 1], [1, 1]],
-      T: [[0, 1, 0], [1, 1, 1]],
-      S: [[0, 1, 1], [1, 1, 0]],
-      Z: [[1, 1, 0], [0, 1, 1]],
-      J: [[1, 0, 0], [1, 1, 1]],
-      L: [[0, 0, 1], [1, 1, 1]]
+      I: [[0,0,0,0], [1,1,1,1], [0,0,0,0], [0,0,0,0]],
+      O: [[1,1], [1,1]],
+      T: [[0,1,0], [1,1,1], [0,0,0]],
+      S: [[0,1,1], [1,1,0], [0,0,0]],
+      Z: [[1,1,0], [0,1,1], [0,0,0]],
+      J: [[1,0,0], [1,1,1], [0,0,0]],
+      L: [[0,0,1], [1,1,1], [0,0,0]]
     };
 
     this.colors = {
@@ -49,21 +50,89 @@ class TetrisGame {
     this.dropInterval = 1000;
     this.lastDrop = 0;
 
+    // Touch controls
+    this.touchStartX = null;
+    this.touchStartY = null;
+
     // Bind methods
     this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.handleTouchStart = this.handleTouchStart.bind(this);
+    this.handleTouchEnd = this.handleTouchEnd.bind(this);
     this.gameLoop = this.gameLoop.bind(this);
     this.draw = this.draw.bind(this);
 
     // Setup
-    this.setupGame();
-    this.setupControls();
-    this.createScoreDisplay();
+    this.createControlSelection();
   }
 
-  setupGame() {
+  createControlSelection() {
+    // Check if control selection already exists
+    if (this.container.querySelector('.control-selection')) return;
+
+    const controlSelection = document.createElement('div');
+    controlSelection.classList.add('control-selection');  // Add class for checking
+    controlSelection.style.textAlign = 'center';
+    controlSelection.style.marginBottom = '20px';
+
+    const title = document.createElement('h2');
+    title.textContent = 'Choose Control Type';
+    controlSelection.appendChild(title);
+
+    const pcButton = this.createButton('PC Controls', () => this.setupGame('pc'));
+    const mobileButton = this.createButton('Mobile Controls', () => this.setupGame('mobile'));
+
+    controlSelection.appendChild(pcButton);
+    controlSelection.appendChild(mobileButton);
+
+    this.container.insertBefore(controlSelection, this.canvas);
+  }
+
+  createButton(text, onClick) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.style.margin = '10px';
+    button.style.padding = '15px 30px';
+    button.style.fontSize = '16px';
+    button.style.backgroundColor = '#4CAF50';
+    button.style.color = 'white';
+    button.style.border = 'none';
+    button.style.borderRadius = '8px';
+    button.style.cursor = 'pointer';
+    button.style.transition = 'all 0.3s ease';
+    
+    button.addEventListener('mouseover', () => {
+      button.style.backgroundColor = '#45a049';
+      button.style.transform = 'translateY(-2px)';
+    });
+    
+    button.addEventListener('mouseout', () => {
+      button.style.backgroundColor = '#4CAF50';
+      button.style.transform = 'translateY(0)';
+    });
+    
+    button.addEventListener('click', onClick);
+    return button;
+  }
+
+  setupGame(controlType) {
+    this.controlType = controlType;
+    this.container.querySelector('div').style.display = 'none';
+    this.canvas.style.display = 'block';
+
     this.canvas.style.border = '2px solid #333';
     this.canvas.style.backgroundColor = '#fff';
+    
+    if (this.controlType === 'pc') {
+      document.addEventListener('keydown', this.handleKeyPress);
+    } else {
+      this.canvas.addEventListener('touchstart', this.handleTouchStart);
+      this.canvas.addEventListener('touchend', this.handleTouchEnd);
+    }
+
+    this.createScoreDisplay();
+    this.updateScore(); // Move this here after scoreDisplay is created
     this.newPiece();
+    this.gameLoop(performance.now());
   }
 
   createScoreDisplay() {
@@ -73,10 +142,6 @@ class TetrisGame {
     this.scoreDisplay.style.fontWeight = 'bold';
     this.container.appendChild(this.scoreDisplay);
     this.updateScore();
-  }
-
-  setupControls() {
-    document.addEventListener('keydown', this.handleKeyPress);
   }
 
   handleKeyPress(e) {
@@ -111,6 +176,40 @@ class TetrisGame {
         this.togglePause();
         break;
     }
+    this.draw();
+  }
+
+  handleTouchStart(e) {
+    if (this.gameOver) return;
+    const touch = e.touches[0];
+    this.touchStartX = touch.clientX;
+    this.touchStartY = touch.clientY;
+  }
+
+  handleTouchEnd(e) {
+    if (this.gameOver) return;
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - this.touchStartX;
+    const deltaY = touch.clientY - this.touchStartY;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Horizontal swipe
+      if (deltaX > 50 && this.isValidMove(this.currentPiece, this.currentX + 1, this.currentY)) {
+        this.currentX++;
+      } else if (deltaX < -50 && this.isValidMove(this.currentPiece, this.currentX - 1, this.currentY)) {
+        this.currentX--;
+      }
+    } else if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 50) {
+      // Downward swipe
+      this.hardDrop();
+    } else if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
+      // Tap (rotate)
+      const rotated = this.rotate(this.currentPiece);
+      if (this.isValidMove(rotated, this.currentX, this.currentY)) {
+        this.currentPiece = rotated;
+      }
+    }
+
     this.draw();
   }
 
@@ -281,14 +380,21 @@ class TetrisGame {
     this.gameOver = false;
     this.paused = false;
     this.dropInterval = 1000;
-    this.updateScore();
-    this.newPiece();
-    this.lastDrop = performance.now();
-    requestAnimationFrame(this.gameLoop);
+    
+    // Hide the canvas initially
+    this.canvas.style.display = 'none';
+    
+    // Remove the duplicate control selection creation
+    // this.createControlSelection();  <- Remove this line
   }
 
   destroy() {
-    document.removeEventListener('keydown', this.handleKeyPress);
+    if (this.controlType === 'pc') {
+      document.removeEventListener('keydown', this.handleKeyPress);
+    } else {
+      this.canvas.removeEventListener('touchstart', this.handleTouchStart);
+      this.canvas.removeEventListener('touchend', this.handleTouchEnd);
+    }
   }
 }
 
