@@ -1,3 +1,4 @@
+const socket = io();
 class TicTacToeGame {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
