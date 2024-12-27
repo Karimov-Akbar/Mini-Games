@@ -17,6 +17,12 @@ class CheckersGame {
     this.selectedPiece = null;
 
     this.canvas.addEventListener('click', this.handleClick.bind(this));
+    this.canvas.addEventListener('touchstart', this.handleTouch.bind(this));
+
+    // Load crown image
+    this.crownImage = new Image();
+    this.crownImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABp0lEQVR4nO2UO0sDQRDHf3dGMQkBG1/4KHwUvg3aKdjYWPkFLGzFzlbQb6FgZWOjjYVgYSGCLyxiSCRGkuDlkjvvLhc8TLzNXXKXhID/Zndmdv7M7MwsPOc/yxhzCGwAi865Cj8oY8wqcAZkwmcNWPgpgDFmDrgBZkSkANSAY2DqJwAp8JYAjsNa6acAu8BKwp6P/nPfBRhjloELIBeWHgCMMYvAKTAZbF+Bc+AeGABbwDYwHGxvwKZz7jUVYIzJAlfAWFi6Bs6cc/eRTQk4APLA+/+cc1UReQk2k8A+MBpsb4ENINoEGGPmgdtg/AQcOecqPXzPAGWgGEEq3vkEsBds74EN59ybD8gAV8B4WDoDTp1zDz0AqGoeuEREHPAUmxSBA2AkbL8Bq865NxGZAG6CcwWOVLXRK9mqWsA7XwL2RGRIVYeBA6AQ7OqqOquqh8Bw2HsEDlW10auKVHUOuI2cr6tqKbIpAkciMgzUnXMPqpqLbCaAPVUd7ddN80BZRIqqOgXsArnQ4GvAuXOu2cP3LHCiqpP9AHrK9/+i/pQ+AGvTglhh57eZAAAAAElFTkSuQmCC';
+    this.crownImage.onload = () => this.draw();
   }
 
   initializeBoard() {
@@ -40,7 +46,7 @@ class CheckersGame {
     return board;
   }
 
-  drawBoard() {
+  draw() {
     for (let row = 0; row < this.boardSize; row++) {
       for (let col = 0; col < this.boardSize; col++) {
         this.ctx.fillStyle = (row + col) % 2 === 0 ? '#f0d9b5' : '#b58863';
@@ -59,11 +65,14 @@ class CheckersGame {
           );
           this.ctx.fill();
 
-          // Draw a crown if the piece is a king
           if (piece.king) {
-            this.ctx.fillStyle = 'gold';
-            this.ctx.font = '20px Arial';
-            this.ctx.fillText('K', col * this.cellSize + this.cellSize / 2 - 6, row * this.cellSize + this.cellSize / 2 + 6);
+            this.ctx.drawImage(
+              this.crownImage,
+              col * this.cellSize + this.cellSize / 4,
+              row * this.cellSize + this.cellSize / 4,
+              this.cellSize / 2,
+              this.cellSize / 2
+            );
           }
         }
       }
@@ -74,6 +83,19 @@ class CheckersGame {
     const rect = this.canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
+    this.handleInteraction(x, y);
+  }
+
+  handleTouch(event) {
+    event.preventDefault();
+    const rect = this.canvas.getBoundingClientRect();
+    const touch = event.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    this.handleInteraction(x, y);
+  }
+
+  handleInteraction(x, y) {
     const col = Math.floor(x / this.cellSize);
     const row = Math.floor(y / this.cellSize);
 
@@ -83,7 +105,7 @@ class CheckersGame {
       this.selectPiece(row, col);
     }
 
-    this.drawBoard();
+    this.draw();
   }
 
   selectPiece(row, col) {
@@ -102,35 +124,26 @@ class CheckersGame {
     const rowDiff = newRow - row;
     const colDiff = newCol - col;
 
-    const validMoveForKing = Math.abs(rowDiff) === 1 && Math.abs(colDiff) === 1;
-    const validMoveForPawn =
-      (this.currentPlayer === 'red' && rowDiff === -1) ||
-      (this.currentPlayer === 'black' && rowDiff === 1);
+    const isValidMove = piece.king
+      ? (Math.abs(rowDiff) === 1 && Math.abs(colDiff) === 1) || (Math.abs(rowDiff) === 2 && Math.abs(colDiff) === 2)
+      : (this.currentPlayer === 'red' && rowDiff === -1) || (this.currentPlayer === 'black' && rowDiff === 1);
 
-    if (
-      Math.abs(rowDiff) === 1 &&
-      Math.abs(colDiff) === 1 &&
-      this.board[newRow][newCol] === null &&
-      (piece.king || validMoveForPawn)
-    ) {
+    if (isValidMove && this.board[newRow][newCol] === null) {
+      if (Math.abs(rowDiff) === 2 && Math.abs(colDiff) === 2) {
+        const jumpedRow = row + rowDiff / 2;
+        const jumpedCol = col + colDiff / 2;
+        if (this.board[jumpedRow][jumpedCol] && this.board[jumpedRow][jumpedCol].color !== this.currentPlayer) {
+          this.board[jumpedRow][jumpedCol] = null;
+        } else {
+          this.selectedPiece = null;
+          return;
+        }
+      }
+
       this.board[newRow][newCol] = piece;
       this.board[row][col] = null;
       this.checkKingStatus(newRow, newCol);
       this.currentPlayer = this.currentPlayer === 'red' ? 'black' : 'red';
-    } else if (
-      Math.abs(rowDiff) === 2 &&
-      Math.abs(colDiff) === 2 &&
-      this.board[newRow][newCol] === null
-    ) {
-      const jumpedRow = row + rowDiff / 2;
-      const jumpedCol = col + colDiff / 2;
-      if (this.board[jumpedRow][jumpedCol] && this.board[jumpedRow][jumpedCol].color !== this.currentPlayer) {
-        this.board[newRow][newCol] = piece;
-        this.board[row][col] = null;
-        this.board[jumpedRow][jumpedCol] = null;
-        this.checkKingStatus(newRow, newCol);
-        this.currentPlayer = this.currentPlayer === 'red' ? 'black' : 'red';
-      }
     }
 
     this.selectedPiece = null;
@@ -146,7 +159,7 @@ class CheckersGame {
   }
 
   start() {
-    this.drawBoard();
+    this.draw();
   }
 }
 
