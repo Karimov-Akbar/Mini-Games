@@ -25,6 +25,10 @@ class TicTacToeGame {
     this.isHost = false;
     this.inviteCode = null;
     this.opponentConnected = false;
+    this.players = [];
+    this.lobby = [];
+    this.isInLobby = false;
+    this.opponentName = null;
 
     // Bind methods
     this.handleClick = this.handleClick.bind(this);
@@ -33,6 +37,13 @@ class TicTacToeGame {
     this.showMultiplayerOptions = this.showMultiplayerOptions.bind(this);
     this.hostGame = this.hostGame.bind(this);
     this.joinGame = this.joinGame.bind(this);
+    this.showLobby = this.showLobby.bind(this);
+    this.simulateLobbyConnection = this.simulateLobbyConnection.bind(this);
+    this.addPlayerToLobby = this.addPlayerToLobby.bind(this);
+    this.startMultiplayerGame = this.startMultiplayerGame.bind(this);
+    this.waitForOpponentMove = this.waitForOpponentMove.bind(this);
+    this.simulateOpponentMove = this.simulateOpponentMove.bind(this);
+
 
     // Show the initial menu
     this.showMenu();
@@ -103,26 +114,25 @@ class TicTacToeGame {
     this.gameMode = 'multi';
     this.isHost = true;
     this.inviteCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-    this.initializeGame();
-    this.showWaitingScreen();
+    this.showLobby();
   }
 
   joinGame(code) {
     this.gameMode = 'multi';
     this.isHost = false;
     this.inviteCode = code;
-    this.initializeGame();
-    this.simulateOpponentConnection();
+    this.showLobby();
   }
 
-  showWaitingScreen() {
+  showLobby() {
+    this.isInLobby = true;
     this.container.innerHTML = '';
-    const waitingDiv = document.createElement('div');
-    waitingDiv.style.textAlign = 'center';
-    waitingDiv.style.padding = '20px';
+    const lobbyDiv = document.createElement('div');
+    lobbyDiv.style.textAlign = 'center';
+    lobbyDiv.style.padding = '20px';
 
     const title = document.createElement('h2');
-    title.textContent = 'Waiting for opponent...';
+    title.textContent = this.isHost ? 'Game Lobby (Host)' : 'Game Lobby';
     title.style.marginBottom = '20px';
 
     const codeDisplay = document.createElement('p');
@@ -130,20 +140,55 @@ class TicTacToeGame {
     codeDisplay.style.fontSize = '24px';
     codeDisplay.style.fontWeight = 'bold';
 
-    waitingDiv.appendChild(title);
-    waitingDiv.appendChild(codeDisplay);
+    this.lobbyList = document.createElement('ul');
+    this.lobbyList.style.listStyle = 'none';
+    this.lobbyList.style.padding = '0';
+    this.lobbyList.style.marginBottom = '20px';
 
-    this.container.appendChild(waitingDiv);
+    const playBtn = this.createButton('Start Game', this.startMultiplayerGame);
+    playBtn.style.display = this.isHost ? 'inline-block' : 'none';
+    playBtn.disabled = true; // Initially disable the button
+    this.playBtn = playBtn;
 
-    // Simulate opponent connection after a short delay
-    setTimeout(() => this.simulateOpponentConnection(), 3000);
+    lobbyDiv.appendChild(title);
+    lobbyDiv.appendChild(codeDisplay);
+    lobbyDiv.appendChild(this.lobbyList);
+    lobbyDiv.appendChild(playBtn);
+
+    this.container.appendChild(lobbyDiv);
+
+    this.simulateLobbyConnection();
   }
 
-  simulateOpponentConnection() {
-    this.opponentConnected = true;
-    this.container.innerHTML = '';
-    this.container.appendChild(this.canvas);
-    this.draw();
+  simulateLobbyConnection() {
+    setTimeout(() => {
+      if (this.isHost) {
+        this.addPlayerToLobby('You (Host)');
+        setTimeout(() => {
+          this.addPlayerToLobby('Player 2');
+          this.playBtn.disabled = false;
+        }, 2000);
+      } else {
+        this.addPlayerToLobby('Host');
+        this.addPlayerToLobby('You');
+      }
+    }, 1000);
+  }
+
+  addPlayerToLobby(playerName) {
+    const playerItem = document.createElement('li');
+    playerItem.textContent = playerName;
+    playerItem.style.fontSize = '18px';
+    playerItem.style.margin = '10px 0';
+    this.lobbyList.appendChild(playerItem);
+    this.lobby.push(playerName);
+  }
+
+  startMultiplayerGame() {
+    if (this.lobby.length < 2) return;
+    this.isInLobby = false;
+    this.opponentName = this.lobby.find(name => name !== 'You (Host)');
+    this.initializeGame();
   }
 
   initializeGame() {
@@ -186,13 +231,11 @@ class TicTacToeGame {
       this.currentPlayer = this.currentPlayer === 'X' ? 'O' : 'X';
       if (this.gameMode === 'single' && this.currentPlayer === 'O') {
         this.makeAIMove();
+      } else if (this.gameMode === 'multi') {
+        this.waitForOpponentMove();
       }
     }
     this.draw();
-
-    if (this.gameMode === 'multi') {
-      this.simulateSendMoveToOpponent(row, col);
-    }
   }
 
   makeAIMove() {
@@ -205,24 +248,30 @@ class TicTacToeGame {
       }
     }
     if (emptyCells.length > 0) {
-      const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-      this.makeMove(randomCell.row, randomCell.col);
+      setTimeout(() => {
+        const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        this.makeMove(randomCell.row, randomCell.col);
+      }, 1000); // 1-second delay for AI move
     }
   }
 
-  simulateSendMoveToOpponent(row, col) {
-    // In a real implementation, this would send the move to the server
-    console.log(`Sending move: row ${row}, col ${col}`);
-    // Simulate receiving opponent's move after a short delay
+  waitForOpponentMove() {
+    this.canvas.style.cursor = 'not-allowed';
+    const waitingMessage = document.createElement('div');
+    waitingMessage.textContent = `Waiting for ${this.opponentName}'s move...`;
+    waitingMessage.style.textAlign = 'center';
+    waitingMessage.style.marginTop = '10px';
+    waitingMessage.style.fontSize = '18px';
+    this.container.appendChild(waitingMessage);
+
     setTimeout(() => {
-      if (!this.gameOver) {
-        this.simulateReceiveOpponentMove();
-      }
-    }, 1000);
+      this.container.removeChild(waitingMessage);
+      this.canvas.style.cursor = 'pointer';
+      this.simulateOpponentMove();
+    }, 2000); // Simulating a 2-second delay for opponent's move
   }
 
-  simulateReceiveOpponentMove() {
-    // In a real implementation, this would receive the move from the server
+  simulateOpponentMove() {
     const emptyCells = [];
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
@@ -236,6 +285,7 @@ class TicTacToeGame {
       this.makeMove(randomCell.row, randomCell.col);
     }
   }
+
 
   checkWinner() {
     const lines = [
@@ -306,6 +356,16 @@ class TicTacToeGame {
           this.ctx.fillText(value, x, y);
         }
       }
+    }
+
+    // Draw player names in multiplayer mode
+    if (this.gameMode === 'multi') {
+      this.ctx.font = '16px Arial';
+      this.ctx.fillStyle = '#000';
+      this.ctx.textAlign = 'left';
+      this.ctx.fillText(`You (${this.isHost ? 'X' : 'O'})`, 10, 25);
+      this.ctx.textAlign = 'right';
+      this.ctx.fillText(`${this.opponentName} (${this.isHost ? 'O' : 'X'})`, this.width - 10, 25);
     }
 
     // Draw game over overlay
