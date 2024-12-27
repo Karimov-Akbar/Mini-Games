@@ -3,71 +3,72 @@ const socket = io();
 class TicTacToeGame {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
-    this.socket = io(); // Инициализация подключения к серверу
+    this.socket = io(); // Подключение к серверу
     this.bindSocketEvents();
-    // Остальные свойства...
+    this.isHost = false;
+    this.inviteCode = null;
+    this.lobby = [];
+    // Другие свойства...
   }
 
   bindSocketEvents() {
-    // Подключение к серверу
     this.socket.on('connect', () => {
-      console.log('Connected to server');
+      console.log('Подключено к серверу');
     });
 
-    // Обновление лобби при подключении игрока
-    this.socket.on('updateLobby', (lobby) => {
-      this.lobby = lobby;
+    this.socket.on('lobbyCreated', ({ code, players }) => {
+      this.isHost = true;
+      this.inviteCode = code;
+      this.lobby = players;
+      this.showLobby();
+    });
+
+    this.socket.on('updateLobby', (players) => {
+      this.lobby = players;
       this.updateLobbyUI();
-      if (this.isHost && this.lobby.length === 2) {
-        this.playBtn.disabled = false;
-      }
     });
 
-    // Начало игры
-    this.socket.on('startGame', (opponentName) => {
+    this.socket.on('gameStarted', ({ players }) => {
       this.opponentConnected = true;
-      this.opponentName = opponentName;
+      this.opponentName = players.find((p) => p !== (this.isHost ? 'X' : 'O'));
       this.initializeGame();
     });
 
-    // Получение хода оппонента
-    this.socket.on('opponentMove', ({ row, col }) => {
-      this.makeMove(row, col);
+    this.socket.on('errorMessage', (message) => {
+      alert(message);
     });
   }
 
   hostGame() {
-    this.gameMode = 'multi';
-    this.isHost = true;
     this.socket.emit('hostGame');
-    this.showLobby();
   }
 
   joinGame(code) {
-    this.gameMode = 'multi';
-    this.isHost = false;
     this.socket.emit('joinGame', code);
-    this.showLobby();
-  }
-
-  addPlayerToLobby(playerName) {
-    // Элементы списка обновляются через события сокета
-    const playerItem = document.createElement('li');
-    playerItem.textContent = playerName;
-    playerItem.style.fontSize = '18px';
-    playerItem.style.margin = '10px 0';
-    this.lobbyList.appendChild(playerItem);
   }
 
   startMultiplayerGame() {
-    if (this.lobby.length < 2) return;
-    this.socket.emit('startGame');
+    if (this.lobby.length < 2) {
+      alert('Ожидайте подключения второго игрока.');
+      return;
+    }
+    this.socket.emit('startGame', this.inviteCode);
   }
 
-  makeMove(row, col) {
-    if (this.gameMode === 'multi' && this.currentPlayer === (this.isHost ? 'X' : 'O')) {
-      this.socket.emit('makeMove', { row, col });
+  updateLobbyUI() {
+    // Обновление интерфейса для отображения игроков в лобби
+    const lobbyList = document.querySelector('#lobbyList');
+    lobbyList.innerHTML = '';
+    this.lobby.forEach((player) => {
+      const listItem = document.createElement('li');
+      listItem.textContent = player;
+      lobbyList.appendChild(listItem);
+    });
+
+    // Активируем кнопку "Start Game" только для хоста
+    if (this.isHost) {
+      const startBtn = document.querySelector('#startGameBtn');
+      startBtn.disabled = this.lobby.length < 2;
     }
-    // Остальная логика хода...
   }
 }
