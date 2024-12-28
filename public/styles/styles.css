@@ -15,22 +15,25 @@
 }
 
 html {
-  overflow: hidden;
-  overscroll-behavior: none;
   font-size: 16px;
 }
 
 body {
-  overflow: hidden;
-  overscroll-behavior: none;
   font-family: 'Poppins', sans-serif;
   background-color: var(--background-color);
   color: var(--text-color);
   line-height: 1.6;
   transition: background-color 0.3s ease;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
 }
 
 header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   background-color: var(--primary-color);
   color: white;
   text-align: center;
@@ -417,4 +420,8 @@ h1 {
     padding: 8px 16px;
     font-size: 14px;
   }
+}
+
+main {
+  padding-top: calc(clamp(1rem, 5vw, 2rem) * 2 + 2.5rem);
 }

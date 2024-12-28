@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mini-Games App</title>
     <link rel="stylesheet" href="../styles/styles.css">
     <link rel="icon" type="image/png" href="../images/logo.png">
@@ -29,8 +29,8 @@
                 <button class="play-btn">Play</button>
             </div>
             <div class="game-card" id="tetris">
-                <img src="https://easy-peasy.ai/cdn-cgi/image/quality=80,format=auto,width=700/https://fdczvxmwwjwpwbeeqcth.supabase.co/storage/v1/object/public/images/691647b5-4acb-47a0-b77a-f4bdeaf4183b/4323f599-da57-46a3-ab2f-9ee1e171d3e9.png" alt="Billiards Game">
-                <h2><i class="fas fa-circle"></i> Tetris</h2>
+                <img src="https://easy-peasy.ai/cdn-cgi/image/quality=80,format=auto,width=700/https://fdczvxmwwjwpwbeeqcth.supabase.co/storage/v1/object/public/images/691647b5-4acb-47a0-b77a-f4bdeaf4183b/4323f599-da57-46a3-ab2f-9ee1e171d3e9.png" alt="Tetris Game">
+                <h2><i class="fas fa-shapes"></i> Tetris</h2>
                 <button class="play-btn">Play</button>
             </div>
             <div class="game-card" id="flappybird">
@@ -63,5 +63,21 @@
         </div>
     </div>
     <script src="../js/script.js" type="module"></script>
+    <script>
+        document.addEventListener('touchmove', function (event) {
+            if (event.scale !== 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        var lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            var now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
 </body>
 </html>
