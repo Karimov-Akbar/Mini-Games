@@ -5,12 +5,18 @@ class TetrisGame {
     this.ctx = this.canvas.getContext('2d');
     this.container.appendChild(this.canvas);
 
+    // Make block size responsive
+    this.calculateDimensions();
+    
+    // Add resize listener
+    window.addEventListener('resize', () => {
+      this.calculateDimensions();
+      this.draw();
+    });
+
     // Game dimensions
-    this.blockSize = 30;
     this.rows = 20;
     this.cols = 10;
-    this.canvas.width = this.cols * this.blockSize;
-    this.canvas.height = this.rows * this.blockSize;
 
     // Game state
     this.board = Array(this.rows).fill().map(() => Array(this.cols).fill(0));
@@ -65,6 +71,26 @@ class TetrisGame {
     this.createControlSelection();
   }
 
+  calculateDimensions() {
+    const containerWidth = this.container.clientWidth;
+    const containerHeight = window.innerHeight * 0.7;
+    
+    // Calculate block size based on container dimensions while maintaining aspect ratio
+    const maxBlockWidth = Math.floor(containerWidth / this.cols);
+    const maxBlockHeight = Math.floor(containerHeight / this.rows);
+    this.blockSize = Math.min(maxBlockWidth, maxBlockHeight, 30); // Reduced max size to 30px
+    
+    // Update canvas dimensions
+    this.canvas.width = this.cols * this.blockSize;
+    this.canvas.height = this.rows * this.blockSize;
+    
+    // Style the canvas container
+    this.canvas.style.display = 'block';
+    this.canvas.style.margin = '0 auto';
+    this.canvas.style.backgroundColor = '#f0f0f0';
+    this.canvas.style.border = '2px solid #333';
+  }
+
   createControlSelection() {
     // Check if control selection already exists
     if (this.container.querySelector('.control-selection')) return;
@@ -116,11 +142,16 @@ class TetrisGame {
 
   setupGame(controlType) {
     this.controlType = controlType;
-    this.container.querySelector('div').style.display = 'none';
+    const controlSelection = this.container.querySelector('.control-selection');
+    if (controlSelection) {
+      controlSelection.style.display = 'none';
+    }
+    
     this.canvas.style.display = 'block';
-
-    this.canvas.style.border = '2px solid #333';
-    this.canvas.style.backgroundColor = '#fff';
+    this.calculateDimensions(); // Recalculate dimensions
+    
+    // Create score display first
+    this.createScoreDisplay();
     
     if (this.controlType === 'pc') {
       document.addEventListener('keydown', this.handleKeyPress);
@@ -129,9 +160,9 @@ class TetrisGame {
       this.canvas.addEventListener('touchend', this.handleTouchEnd);
     }
 
-    this.createScoreDisplay();
-    this.updateScore(); // Move this here after scoreDisplay is created
+    this.updateScore();
     this.newPiece();
+    this.draw(); // Initial draw
     this.gameLoop(performance.now());
   }
 
@@ -308,14 +339,41 @@ class TetrisGame {
   }
 
   draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // Clear canvas with background
+    this.ctx.fillStyle = '#f0f0f0';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Draw grid
+    this.ctx.strokeStyle = '#ddd';
+    this.ctx.lineWidth = 0.5;
+    
+    // Vertical lines
+    for (let i = 0; i <= this.cols; i++) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(i * this.blockSize, 0);
+      this.ctx.lineTo(i * this.blockSize, this.canvas.height);
+      this.ctx.stroke();
+    }
+    
+    // Horizontal lines
+    for (let i = 0; i <= this.rows; i++) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, i * this.blockSize);
+      this.ctx.lineTo(this.canvas.width, i * this.blockSize);
+      this.ctx.stroke();
+    }
 
     // Draw board
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
         if (this.board[r][c]) {
           this.ctx.fillStyle = this.colors[this.board[r][c]];
-          this.ctx.fillRect(c * this.blockSize, r * this.blockSize, this.blockSize - 1, this.blockSize - 1);
+          this.ctx.fillRect(
+            c * this.blockSize,
+            r * this.blockSize,
+            this.blockSize - 1,
+            this.blockSize - 1
+          );
         }
       }
     }
